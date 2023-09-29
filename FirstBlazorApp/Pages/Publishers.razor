@@ -1,0 +1,135 @@
+﻿@page "/publishers"
+@using FirstBlazorApp.Data.Services.Interfaces
+@using Microsoft.AspNetCore.Components
+@using FirstBlazorApp.Data.Models
+@inject NavigationManager NavigationManager
+@inject IPublishersPageService PublishersService
+
+@* Для вызова методов JS подключаем IJSRuntime *@
+@inject IJSRuntime JsRuntime
+
+<div class="col-4">
+    <h3>
+        <b>Enter Publisher Information</b>
+    </h3>
+    <hr/>
+    <ServerValidations IsVisible="IsSaveSuccessMessageVisible" Success="SaveSuccess">
+        <span>Publisher: </span>@RecordName
+    </ServerValidations>
+
+    @* Форма сохранения *@
+    <EditForm Model="@PublisherRecord" OnValidSubmit="@SavePublisher">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+
+        <div class="col-12 row">
+            <label class="col-4 font-weight-bold">First name :</label>
+            <InputText @ref="firstNameInput" class="form-control col-3" @bind-Value="PublisherRecord.Name" placeholder="first name"/>
+            &nbsp;<ValidationMessage For="@(() => PublisherRecord.Name)"></ValidationMessage>
+        </div>
+        <br/>
+        <div class="col-12 row">
+            <label class="col-4 font-weight-bold">City :</label>
+            <SelectCity OnChangeEvent="OnSelectCityChange"></SelectCity>
+        </div>
+        <br/>
+        <div class="col-12 row">
+            <span class="col-2"></span>
+            <input type="submit" class="form-control btn btn-primary" value="Save"/>
+            <span>&nbsp;</span>
+            <input type="submit" class="form-control btn btn-primary" value="Clear"/>
+        </div>
+        <br/>
+    </EditForm>
+</div>
+
+
+<div class="col-10">
+    <h3>
+        <b>Autors</b>
+    </h3>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>PublisherId</th>
+            <th>Publisher Name</th>
+            <th>City</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var publisherRecord in this.PublisherRecords)
+        {
+            <tr>
+                <td>@publisherRecord.Id</td>
+                <td>@publisherRecord.Name</td>
+                <td>@publisherRecord.City</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<hr/>
+
+<div class="col-12">"Место для текущей даты"</div>
+<div class="col-12">Место для версии</div>
+
+@code {
+    private List<PublisherRecord> PublisherRecords { get; set; }
+    private PublisherRecord PublisherRecord { get; set; }
+    private string[] Cities { get; set; }
+
+    private InputText firstNameInput;
+    private InputSelect<string> cityInputText;
+
+    private string RecordName { get; set; }
+    private string SelectedCity { get; set; }
+    private bool SaveSuccess { get; set; }
+    private bool IsSaveSuccessMessageVisible { get; set; }
+
+    protected override void OnInitialized()
+    {
+        this.PublisherRecord = new PublisherRecord();
+        this.PublisherRecords = this.PublishersService.GetPublishers();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await firstNameInput.Element.Value.FocusAsync();
+        if (this.Cities == null)
+        {
+            this.Cities = await JsRuntime.InvokeAsync<string[]>("getCities");
+            StateHasChanged();
+        }
+    }
+
+    private async Task SavePublisher()
+    {
+        try
+        {
+            this.PublisherRecord.City = this.SelectedCity;
+            this.RecordName = PublisherRecord.Name;
+            this.PublishersService.SavePublisher(this.PublisherRecord);
+
+            this.PublisherRecord = new PublisherRecord();
+
+            this.IsSaveSuccessMessageVisible = true;
+            this.SaveSuccess = true;
+        }
+        catch (Exception e)
+        {
+            this.SaveSuccess = false;
+        }
+    }
+
+    private void OnSelectCityChange(ChangeEventArgs changeEventArgs)
+    {
+        SelectedCity = (string)changeEventArgs.Value;
+    }
+
+}

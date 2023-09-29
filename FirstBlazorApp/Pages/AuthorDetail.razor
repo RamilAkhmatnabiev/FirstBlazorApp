@@ -1,0 +1,34 @@
+﻿@page "/authors/authordetail/{authorId:int}"
+@page "/authors/authordetail"
+@using FirstBlazorApp.Data.Services.Interfaces
+@using FirstBlazorApp.Data.Models
+@inject IAuthorService AuthorService
+
+<h3>AuthorDetail</h3>
+<hr/>
+<div class="col-12 row">
+    <h5 class="col-12 row" style="font-weight:bold">@Author?.Name, @Author?.LastName</h5>
+    <h6 class="col-12 row">Description: @Author?.Description</h6>
+    <h6 class="col-12 row">Address: @Author?.Address</h6>
+</div>
+
+<div class="col-12">"Место для текущей даты"</div>
+<div class="col-12">Место для версии</div>
+
+<p> /Какойто рандомный автор</p>
+<p> Тут должен быть переданный идентификатор: "@AuthorId"</p>
+
+@code {
+    [Parameter]
+    public int AuthorId { get; set; }
+
+    [Parameter]
+    public string AuthorIdInt { get; set; }
+
+    private AuthorRecord Author { get; set; }
+
+    protected override void OnInitialized()
+    {
+        this.Author = this.AuthorService.GetAuthor(AuthorId);
+    }
+}

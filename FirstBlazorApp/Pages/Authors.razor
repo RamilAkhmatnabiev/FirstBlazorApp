@@ -1,0 +1,187 @@
+﻿@page "/authors"
+@using FirstBlazorApp.Data.Services.Interfaces
+@using Microsoft.AspNetCore.Components
+@using FirstBlazorApp.Data.Models
+@inject NavigationManager NavigationManager
+@inject IAuthorService AuthorService
+
+@* Для вызова методов JS подключаем IJSRuntime *@
+@inject IJSRuntime JsRuntime
+
+<div class="col-4">
+    <h3>
+        <b>Enter Author Information</b>
+    </h3>
+    <hr/>
+    <ServerValidations IsVisible="IsSaveSuccessMessageVisible" Success="SaveSuccess">
+        <span>Author: </span>@AuthorName
+    </ServerValidations>
+
+    @* Форма сохранения *@
+    <EditForm Model="@AuthorModel" OnValidSubmit="@SaveAuthor">
+        @* Валидировать модель по атрибутам *@
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+
+        @* Валидировать выводя ошибки(Выводит дефолтные ошибки или ошибки из модели) *@
+        @* Если есть ValidationMessage у поля, то будет индивидуальное сообщение для каждого поля. А тут общее сообщение сверху формы *@
+        @*<ValidationSummary></ValidationSummary>*@
+
+        <div class="col-12 row">
+            <label class="col-4 font-weight-bold">First name :</label>
+            @* Задаем ссылку на HTML-компенент ключевым словом ref. Ахуй ниже => *@
+            <InputText @ref="firstNameInput" class="form-control col-3" @bind-Value="AuthorModel.Name" placeholder="first name"/>
+            &nbsp;<ValidationMessage For="@(() => AuthorModel.Name)"></ValidationMessage>
+        </div>
+        <br/>
+        <div class="col-12 row">
+            <label class="col-4 font-weight-bold">Last name :</label>
+            <InputText class="form-control col-3" @bind-Value="AuthorModel.LastName" placeholder="last name"/>
+            &nbsp;<ValidationMessage For="@(() => AuthorModel.LastName)"></ValidationMessage>
+        </div>
+        <br/>
+        <div class="col-12 row">
+            <label class="col-4 font-weight-bold">City :</label>
+            <SelectCity OnChangeEvent="OnSelectCityChange"></SelectCity>
+        </div>
+        <br/>
+        <div class="col-12 row">
+            <label class="col-4 font-weight-bold">Email :</label>
+            <InputText class="form-control col-3" @bind-Value="AuthorModel.Email" placeholder="email"/>
+            &nbsp;<ValidationMessage For="@(() => AuthorModel.City)"></ValidationMessage>
+        </div>
+        <br/>
+        <div class="col-12 row">
+            <label class="col-4 font-weight-bold">Salary :</label>
+            <InputNumber class="form-control col-3" @bind-Value="AuthorModel.Salary" placeholder="salary"/>
+            &nbsp;<ValidationMessage For="@(() => AuthorModel.Salary)"></ValidationMessage>
+        </div>
+        <br/>
+        <div class="col-12 row">
+            <span class="col-2"></span>
+            <input type="submit" class="form-control btn btn-primary" value="Save"/>
+            <span>&nbsp;</span>
+            <input type="submit" class="form-control btn btn-primary" value="Clear"/>
+        </div>
+        <br/>
+    </EditForm>
+</div>
+
+
+<div class="col-10">
+    <h3>
+        <b>Autors</b>
+    </h3>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>AuthorId</th>
+            <th>First Name</th>
+            <th>Lat Name</th>
+            <th>City</th>
+            <th>Email Address</th>
+            <th>Salary</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var author in this.AuthorRecords)
+        {
+            <tr>
+                <td>
+                    <NavLink fref=@string.Format("/authors/authordetail/{0}", author.Id)>
+                        @author.Id
+                    </NavLink>
+                </td>
+                <td>@author.Name</td>
+                <td>@author.LastName</td>
+                <td>@author.City</td>
+                <td>@author.Email</td>
+                <td>@author.Salary</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<hr/>
+
+<div class="col-12">"Место для текущей даты"</div>
+<div class="col-12">Место для версии</div>
+
+<a href="/authors/authordetail">Автор 1</a>
+<br/>
+<button class="btn btn-primary" @onclick="OnGoToButtonClick">Go with 1</button>
+
+@code {
+    private List<AuthorRecord> AuthorRecords { get; set; }
+    private AuthorRecord AuthorModel { get; set; }
+    private string[] Cities { get; set; }
+    
+    private string AuthorName { get; set; }
+    private string SelectedCity { get; set; }
+    private bool SaveSuccess { get; set; }
+    private bool IsSaveSuccessMessageVisible { get; set; }
+
+    //Так ловим элементы HTML
+    //Просто создаем поле с типом ElementReference и названием из ref элемента, и он становится доступным для взаимодействия!!!!
+    private ElementReference firstNameInput2;
+
+    //Так ловим элементы Blazor'a. ВНутри себя уже содержит ссылку на html элемент
+    private InputText firstNameInput;
+
+
+    private void OnGoToButtonClick()
+    {
+        NavigationManager.NavigateTo("/authors/authordetail/1");
+    }
+
+    protected override void OnInitialized()
+    {
+        this.AuthorModel = new AuthorRecord();
+        this.AuthorRecords = this.AuthorService.GetAuthorRecords();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await firstNameInput.Element.Value.FocusAsync();
+    }
+
+    private async Task SaveAuthor()
+    {
+        try
+        {
+            this.AuthorModel.City = SelectedCity;
+            this.AuthorName = AuthorModel.Name;
+            this.AuthorService.SaveAuthor(this.AuthorModel);
+
+            //Вызываем любой JS метод из CS кода. Ебануться!!!
+            await this.JsRuntime.InvokeVoidAsync("showSuccessSaveMessage", this.AuthorModel.Name);
+
+            this.AuthorModel = new AuthorRecord();
+
+            //Вызываем метод с передачей компонента firstNameInput прямо в JS код. Компонент проставился автоматический. Ахуенно!!!
+            await this.JsRuntime.InvokeVoidAsync("setFocusOnElement", firstNameInput.Element);
+
+            //Вызывваем метод элемента напрямую из CS кода
+            await firstNameInput.Element.Value.FocusAsync();
+
+            this.IsSaveSuccessMessageVisible = true;
+            this.SaveSuccess = true;
+        }
+        catch (Exception e)
+        {
+            this.SaveSuccess = false;
+        }
+    }
+    
+    private void OnSelectCityChange(ChangeEventArgs changeEventArgs)
+    {
+        SelectedCity = (string)changeEventArgs.Value;
+    }
+
+}
