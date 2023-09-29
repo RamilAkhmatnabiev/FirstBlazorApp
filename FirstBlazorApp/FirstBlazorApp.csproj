@@ -17,4 +17,14 @@
       <_ContentIncludedByDefault Remove="Shared\SurveyPrompt.razor" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="RamilRazorLibrary">
+        <HintPath>..\..\RamilRazorLibrary\RamilRazorLibrary\bin\Debug\net7.0\RamilRazorLibrary.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MatBlazor" Version="2.10.0" />
+    </ItemGroup>
+
 </Project>
