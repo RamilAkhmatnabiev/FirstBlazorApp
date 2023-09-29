@@ -42,32 +42,52 @@
     </EditForm>
 </div>
 
+@* Old version created by hand *@
+@* <div class="col-10"> *@
+@*     <h3> *@
+@*         <b>Autors</b> *@
+@*     </h3> *@
+@* *@
+@*     <table class="table"> *@
+@*         <thead> *@
+@*         <tr> *@
+@*             <th>PublisherId</th> *@
+@*             <th>Publisher Name</th> *@
+@*             <th>City</th> *@
+@*         </tr> *@
+@*         </thead> *@
+@*         <tbody> *@
+@*         @foreach (var publisherRecord in this.PublisherRecords) *@
+@*         { *@
+@*             <tr> *@
+@*                 <td>@publisherRecord.Id</td> *@
+@*                 <td>@publisherRecord.Name</td> *@
+@*                 <td>@publisherRecord.City</td> *@
+@*             </tr> *@
+@*         } *@
+@*         </tbody> *@
+@*     </table> *@
+@* </div> *@
 
-<div class="col-10">
-    <h3>
-        <b>Autors</b>
-    </h3>
+<div class="col-6">
 
-    <table class="table">
-        <thead>
-        <tr>
-            <th>PublisherId</th>
-            <th>Publisher Name</th>
-            <th>City</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var publisherRecord in this.PublisherRecords)
-        {
-            <tr>
-                <td>@publisherRecord.Id</td>
-                <td>@publisherRecord.Name</td>
-                <td>@publisherRecord.City</td>
-            </tr>
-        }
-        </tbody>
-    </table>
 </div>
+<h3>
+    <b>Publishers</b>
+</h3>
+
+<MatTable Items="@PublisherRecords" Striped="true" AllowSelection="true" RowClass="tester" class="mat-elevation-z5">
+            <MatTableHeader>
+                <th class="col-2">PublisherId</th>
+                <th class="col-6">Publisher Name</th>
+                <th class="col-4">City</th>
+            </MatTableHeader>
+            <MatTableRow>
+                <td>@context.Id</td>
+                <td>@context.Name</td>
+                <td>@context.City</td>
+            </MatTableRow>
+        </MatTable>
 
 <hr/>
 

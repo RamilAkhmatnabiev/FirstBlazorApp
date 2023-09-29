@@ -2,4 +2,6 @@
 	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CUsers_005Cuser_005CRiderProjects_005CRamilRazorLibrary_005CRamilRazorLibrary_005Cbin_005CDebug_005Cnet7_002E0_005CRamilRazorLibrary_002Edll/@EntryIndexedValue">True</s:Boolean>
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
   &lt;Assembly Path="C:\Users\user\RiderProjects\RamilRazorLibrary\RamilRazorLibrary\bin\Debug\net7.0\RamilRazorLibrary.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\user\.nuget\packages\matblazor\2.10.0\lib\net6.0\MatBlazor.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\7.0.3\ref\net7.0\Microsoft.Extensions.Http.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String></wpf:ResourceDictionary>

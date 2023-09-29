@@ -1,6 +1,7 @@
 using FirstBlazorApp.Data;
 using FirstBlazorApp.Data.Services.Impl;
 using FirstBlazorApp.Data.Services.Interfaces;
+using MatBlazor;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,9 @@ builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddTransient<IAuthorService, AuthorService>();
 builder.Services.AddTransient<IPublishersPageService, PublishersPageService>();
 builder.Services.AddSingleton<IBaseDumpSaver, BaseDumpSaver>();
+builder.Services.AddScoped<HttpClient>();
+builder.Services.AddMatBlazor();
+
 
 var app = builder.Build();
 
