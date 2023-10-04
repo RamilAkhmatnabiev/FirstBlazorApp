@@ -1,7 +1,9 @@
 using FirstBlazorApp.Data;
+using FirstBlazorApp.Data.Providers;
 using FirstBlazorApp.Data.Services.Impl;
 using FirstBlazorApp.Data.Services.Interfaces;
 using MatBlazor;
+using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,7 @@ builder.Services.AddSingleton<IBaseDumpSaver, BaseDumpSaver>();
 builder.Services.AddScoped<HttpClient>();
 builder.Services.AddMatBlazor();
 builder.Services.AddSingleton<HttpClient>();
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -30,6 +33,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");

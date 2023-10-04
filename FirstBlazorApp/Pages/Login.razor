@@ -1,0 +1,61 @@
+﻿@page "/Login"
+@using FirstBlazorApp.Data.Models
+@using FirstBlazorApp.Data.Providers
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<body>
+<div class="col-8 card">
+    <div class="col-12 row">
+        <p>&nbsp;</p>
+    </div>
+    <div class="col-12 row">
+        <div class="col-6" style="border-right: groove">
+            <img src="/img/loginpage.jfif" width="400px" height="400px" />
+        </div>
+        <div class="col-6" style="border-left: groove">
+            <EditForm Model="@user" OnValidSubmit="@ValidateUser">
+                <div>
+                    <br /><br /><br /><br />
+                </div>
+                <div>
+                    <h3 style="font-weight: bold; color: purple">Book stores login</h3>
+                </div>
+                <div>
+                    <br />
+                </div>
+                <div class="col-12 row">
+                    <input class="form-control col-12" @bind="user.EmailAddress" placeholder="EmailAddress"/>
+                </div>
+                <br />
+                <div class="col-12 row">
+                    <input type="password" class="form-control col-12" @bind="user.Password" placeholder="Password"/>
+                </div>
+                <br />
+                <div class="col-12 row">
+                    <input type="submit" class="form-control col-12 btn btn-primary" value="Login"/>
+                </div>
+                <br />
+            </EditForm>
+        </div>
+    </div>
+</div>
+</body>
+
+@code {
+    private User user;
+
+    protected override Task OnInitializedAsync()
+    {
+        user = new User();
+        return base.OnInitializedAsync();
+    }
+
+    private async Task<bool> ValidateUser()
+    {
+        ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user.EmailAddress);
+        NavigationManager.NavigateTo("/");
+        return await Task.FromResult(true);
+    }
+
+}
