@@ -3,6 +3,7 @@
 @using FirstBlazorApp.Data.Providers
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
+@inject Blazored.SessionStorage.ISessionStorageService SessionStorage
 
 <body>
 <div class="col-8 card">
@@ -55,6 +56,7 @@
     {
         ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user.EmailAddress);
         NavigationManager.NavigateTo("/");
+        await SessionStorage.SetItemAsync("emailAddress", user.EmailAddress);
         return await Task.FromResult(true);
     }
 

@@ -1,3 +1,4 @@
+using Blazored.SessionStorage;
 using FirstBlazorApp.Data;
 using FirstBlazorApp.Data.Providers;
 using FirstBlazorApp.Data.Services.Impl;
@@ -18,6 +19,7 @@ builder.Services.AddScoped<HttpClient>();
 builder.Services.AddMatBlazor();
 builder.Services.AddSingleton<HttpClient>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+builder.Services.AddBlazoredSessionStorage();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

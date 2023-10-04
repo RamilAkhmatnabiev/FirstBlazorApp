@@ -1,4 +1,6 @@
-﻿@inherits LayoutComponentBase
+﻿@using FirstBlazorApp.Data.Providers
+@inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>FirstBlazorApp</PageTitle>
 
@@ -9,8 +11,16 @@
 
     <main>
         <div class="top-row px-4">
+            <AuthorizeView>
+                <Authorized>
+                    <a href="Login" onclick="@LogOut">LogOut</a>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="Login">Login</a>
+                </NotAuthorized>
+            </AuthorizeView>
             <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-            <a href="Login" target="_blank">Login</a>
+            
         </div>
 
         <article class="content px-4">
@@ -18,3 +28,11 @@
         </article>
     </main>
 </div>
+
+@code
+{
+    private async Task LogOut()
+    {
+        await ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsLoggedOut();
+    }
+}
