@@ -90,7 +90,7 @@
             @* <th>City</th> *@
             <th>Email Address</th>
             <th>Salary</th>
-            <th>Delete</th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -113,6 +113,7 @@
                 <td>
                     @* Пример вызова метода при нажатии элемента с передачей записи из строки *@
                      <a style="text-underline-position: below; cursor: pointer; color: blue; font-weight: bold" @onclick="@(() => DeleteAuthor(author))">Delete</a>
+                     <a style="text-underline-position: below; cursor: pointer; color: blue; font-weight: bold" @onclick="@(() => EditAuthor(author))">Edit</a>
                 </td>
             </tr>
         }
@@ -202,7 +203,16 @@
 
     private async Task<HttpResponseMessage> DoSaveActions()
     {
-        var httpResponse = await this.AuthorService.SaveAuthor(this.AuthorModel);
+        HttpResponseMessage httpResponse;
+        if (this.AuthorModel.AuthorId > 0)
+        {
+            httpResponse = await this.AuthorService.UpdateAuthor(this.AuthorModel);
+        }
+        else
+        {
+            httpResponse = await this.AuthorService.SaveAuthor(this.AuthorModel);
+        }
+        
         this.AuthorModel = new AuthorRecord();
 
         return httpResponse;
@@ -229,6 +239,10 @@
         SelectedCity = (string)changeEventArgs.Value!;
     }
 
+    private async Task EditAuthor(AuthorRecord author)
+    {
+        this.AuthorModel = author;
+    }
     private async Task DeleteAuthor(AuthorRecord author)
     {
         await this.AuthorService.DeleteAuthor(author.AuthorId);

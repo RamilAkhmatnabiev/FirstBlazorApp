@@ -7,6 +7,7 @@ namespace FirstBlazorApp.Data.Services.Interfaces
         Task<List<AuthorRecord>> GetAuthorRecords();
         Task<AuthorRecord?> GetAuthor(int authorId);
         Task<HttpResponseMessage> SaveAuthor(AuthorRecord author);
+        Task<HttpResponseMessage> UpdateAuthor(AuthorRecord author);
         Task<HttpResponseMessage> DeleteAuthor(int authorId);
     }
 }
