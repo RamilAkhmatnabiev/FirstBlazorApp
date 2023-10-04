@@ -14,8 +14,7 @@ builder.Services.AddTransient<IPublishersPageService, PublishersPageService>();
 builder.Services.AddSingleton<IBaseDumpSaver, BaseDumpSaver>();
 builder.Services.AddScoped<HttpClient>();
 builder.Services.AddMatBlazor();
-
-
+builder.Services.AddSingleton<HttpClient>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

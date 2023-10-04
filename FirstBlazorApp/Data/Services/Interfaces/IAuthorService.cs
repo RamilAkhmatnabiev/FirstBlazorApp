@@ -4,8 +4,9 @@ namespace FirstBlazorApp.Data.Services.Interfaces
 {
     public interface IAuthorService
     {
-        List<AuthorRecord> GetAuthorRecords();
-        AuthorRecord GetAuthor(int id);
-        void SaveAuthor(AuthorRecord author);
+        Task<List<AuthorRecord>> GetAuthorRecords();
+        Task<AuthorRecord?> GetAuthor(int authorId);
+        Task<HttpResponseMessage> SaveAuthor(AuthorRecord author);
+        Task<HttpResponseMessage> DeleteAuthor(int authorId);
     }
 }

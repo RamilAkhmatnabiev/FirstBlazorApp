@@ -4,6 +4,8 @@
 @using FirstBlazorApp.Data.Models
 @inject NavigationManager NavigationManager
 @inject IAuthorService AuthorService
+@inject HttpClient HttpClient
+@implements IDisposable
 
 @* Для вызова методов JS подключаем IJSRuntime *@
 @inject IJSRuntime JsRuntime
@@ -18,9 +20,9 @@
     </ServerValidations>
 
     @* Форма сохранения *@
-    <EditForm Model="@AuthorModel" OnValidSubmit="@SaveAuthor">
+    <EditForm Model="@AuthorModel" OnValidSubmit="@OnEditFormSubmit">
         @* Валидировать модель по атрибутам *@
-        <DataAnnotationsValidator></DataAnnotationsValidator>
+        @* <DataAnnotationsValidator></DataAnnotationsValidator> *@
 
         @* Валидировать выводя ошибки(Выводит дефолтные ошибки или ошибки из модели) *@
         @* Если есть ValidationMessage у поля, то будет индивидуальное сообщение для каждого поля. А тут общее сообщение сверху формы *@
@@ -29,8 +31,8 @@
         <div class="col-12 row">
             <label class="col-4 font-weight-bold">First name :</label>
             @* Задаем ссылку на HTML-компенент ключевым словом ref. Ахуй ниже => *@
-            <InputText @ref="firstNameInput" class="form-control col-3" @bind-Value="AuthorModel.Name" placeholder="first name"/>
-            &nbsp;<ValidationMessage For="@(() => AuthorModel.Name)"></ValidationMessage>
+            <InputText @ref="firstNameInput" class="form-control col-3" @bind-Value="AuthorModel.FirstName" placeholder="first name"/>
+            &nbsp;<ValidationMessage For="@(() => AuthorModel.FirstName)"></ValidationMessage>
         </div>
         <br/>
         <div class="col-12 row">
@@ -40,13 +42,20 @@
         </div>
         <br/>
         <div class="col-12 row">
-            <label class="col-4 font-weight-bold">City :</label>
-            <SelectCity OnChangeEvent="OnSelectCityChange"></SelectCity>
+            <label class="col-4 font-weight-bold">Phone :</label>
+            <InputText class="form-control col-3" @bind-Value="AuthorModel.Phone" placeholder="phone"/>
+            &nbsp;<ValidationMessage For="@(() => AuthorModel.Phone)"></ValidationMessage>
         </div>
+        <br/>
+        @* Пример использования кастомного компонента *@
+        @* <div class="col-12 row"> *@
+        @*     <label class="col-4 font-weight-bold">City :</label> *@
+        @*     <SelectCity OnChangeEvent="OnSelectCityChange"></SelectCity> *@
+        @* </div> *@
         <br/>
         <div class="col-12 row">
             <label class="col-4 font-weight-bold">Email :</label>
-            <InputText class="form-control col-3" @bind-Value="AuthorModel.Email" placeholder="email"/>
+            <InputText class="form-control col-3" @bind-Value="AuthorModel.EmailAddress" placeholder="email"/>
             &nbsp;<ValidationMessage For="@(() => AuthorModel.City)"></ValidationMessage>
         </div>
         <br/>
@@ -78,25 +87,33 @@
             <th>AuthorId</th>
             <th>First Name</th>
             <th>Lat Name</th>
-            <th>City</th>
+            @* <th>City</th> *@
             <th>Email Address</th>
             <th>Salary</th>
+            <th>Delete</th>
         </tr>
         </thead>
         <tbody>
-        @foreach (var author in this.AuthorRecords)
+        @foreach (var author in this.AuthorRecords ?? new List<AuthorRecord>())
         {
             <tr>
                 <td>
-                    <NavLink fref=@string.Format("/authors/authordetail/{0}", author.Id)>
-                        @author.Id
+                    <NavLink fref=@string.Format("/authors/authordetail/{0}", author.AuthorId)>
+                        @author.AuthorId
                     </NavLink>
                 </td>
-                <td>@author.Name</td>
+                <td>
+                    <a href=@string.Format("/authors/authordetail/{0}", author.AuthorId)>@author.FirstName</a>
+                </td>
+                @* <td>@author.FirstName</td> *@
                 <td>@author.LastName</td>
-                <td>@author.City</td>
-                <td>@author.Email</td>
+                @* <td>@author.City</td> *@
+                <td>@author.EmailAddress</td>
                 <td>@author.Salary</td>
+                <td>
+                    @* Пример вызова метода при нажатии элемента с передачей записи из строки *@
+                     <a style="text-underline-position: below; cursor: pointer; color: blue; font-weight: bold" @onclick="@(() => DeleteAuthor(author))">Delete</a>
+                </td>
             </tr>
         }
         </tbody>
@@ -105,6 +122,7 @@
 
 <hr/>
 
+@* Тестовые поля для демонстации *@
 <div class="col-12">"Место для текущей даты"</div>
 <div class="col-12">Место для версии</div>
 
@@ -116,9 +134,9 @@
     private List<AuthorRecord> AuthorRecords { get; set; }
     private AuthorRecord AuthorModel { get; set; }
     private string[] Cities { get; set; }
-    
+
     private string AuthorName { get; set; }
-    private string SelectedCity { get; set; }
+    private string? SelectedCity { get; set; }
     private bool SaveSuccess { get; set; }
     private bool IsSaveSuccessMessageVisible { get; set; }
 
@@ -135,10 +153,11 @@
         NavigationManager.NavigateTo("/authors/authordetail/1");
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         this.AuthorModel = new AuthorRecord();
-        this.AuthorRecords = this.AuthorService.GetAuthorRecords();
+        await this.SetAuthorsListAsync();
+        await base.OnInitializedAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -151,37 +170,79 @@
         await firstNameInput.Element.Value.FocusAsync();
     }
 
-    private async Task SaveAuthor()
+    private async Task SetAuthorsListAsync(bool needStateChanges = false)
+    {
+        this.AuthorRecords = await this.AuthorService.GetAuthorRecords();
+        if (needStateChanges)
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnEditFormSubmit()
     {
         try
         {
-            this.AuthorModel.City = SelectedCity;
-            this.AuthorName = AuthorModel.Name;
-            this.AuthorService.SaveAuthor(this.AuthorModel);
-
-            //Вызываем любой JS метод из CS кода. Ебануться!!!
-            await this.JsRuntime.InvokeVoidAsync("showSuccessSaveMessage", this.AuthorModel.Name);
-
-            this.AuthorModel = new AuthorRecord();
-
-            //Вызываем метод с передачей компонента firstNameInput прямо в JS код. Компонент проставился автоматический. Ахуенно!!!
-            await this.JsRuntime.InvokeVoidAsync("setFocusOnElement", firstNameInput.Element);
-
-            //Вызывваем метод элемента напрямую из CS кода
-            await firstNameInput.Element.Value.FocusAsync();
-
-            this.IsSaveSuccessMessageVisible = true;
-            this.SaveSuccess = true;
+            this.SetFieldsBeforeSave();
+            var httpResponse = await this.DoSaveActions();
+            await this.ReLoadAuthorsList();
+            await this.DoAfterSaveActions(httpResponse.IsSuccessStatusCode);
         }
         catch (Exception e)
         {
             this.SaveSuccess = false;
         }
     }
-    
+
+    private void SetFieldsBeforeSave()
+    {
+        this.AuthorModel.City = SelectedCity;
+        this.AuthorName = AuthorModel.FirstName;
+    }
+
+    private async Task<HttpResponseMessage> DoSaveActions()
+    {
+        var httpResponse = await this.AuthorService.SaveAuthor(this.AuthorModel);
+        this.AuthorModel = new AuthorRecord();
+
+        return httpResponse;
+    }
+
+    private async Task DoAfterSaveActions(bool saveSuccess)
+    {
+    //Вызываем любой JS метод из CS кода. Ебануться!!!
+    //await this.JsRuntime.InvokeVoidAsync("showSuccessSaveMessage", this.AuthorModel.FirstName);
+
+    //Вызываем метод с передачей компонента firstNameInput прямо в JS код. Компонент проставился автоматический. Ахуенно!!!
+        await this.JsRuntime.InvokeVoidAsync("setFocusOnElement", firstNameInput.Element);
+
+    //Вызывваем метод элемента напрямую из CS кода
+        await firstNameInput.Element.Value.FocusAsync();
+
+        this.IsSaveSuccessMessageVisible = true;
+        this.SaveSuccess = saveSuccess;
+    }
+
+    //Commentend field
     private void OnSelectCityChange(ChangeEventArgs changeEventArgs)
     {
-        SelectedCity = (string)changeEventArgs.Value;
+        SelectedCity = (string)changeEventArgs.Value!;
+    }
+
+    private async Task DeleteAuthor(AuthorRecord author)
+    {
+        await this.AuthorService.DeleteAuthor(author.AuthorId);
+        await this.ReLoadAuthorsList();
+    }
+
+    private async Task ReLoadAuthorsList()
+    {
+        await this.SetAuthorsListAsync(true);
+    }
+
+    public void Dispose()
+    {
+        ((IDisposable)firstNameInput).Dispose();
     }
 
 }

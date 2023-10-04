@@ -7,7 +7,7 @@
 <h3>AuthorDetail</h3>
 <hr/>
 <div class="col-12 row">
-    <h5 class="col-12 row" style="font-weight:bold">@Author?.Name, @Author?.LastName</h5>
+    <h5 class="col-12 row" style="font-weight:bold">@Author?.FirstName, @Author?.LastName</h5>
     <h6 class="col-12 row">Description: @Author?.Description</h6>
     <h6 class="col-12 row">Address: @Author?.Address</h6>
 </div>
@@ -27,8 +27,11 @@
 
     private AuthorRecord Author { get; set; }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        this.Author = this.AuthorService.GetAuthor(AuthorId);
+        var result = await this.AuthorService.GetAuthor(AuthorId);
+
+        this.Author = result;
+        await base.OnInitializedAsync();
     }
 }
