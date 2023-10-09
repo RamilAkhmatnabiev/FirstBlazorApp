@@ -7,6 +7,7 @@ public class User
     public string EmailAddress { get; set; } = null!;
 
     public string Password { get; set; } = null!;
+    public string? ConfirmPassword { get; set; }
 
     public string Source { get; set; } = null!;
 

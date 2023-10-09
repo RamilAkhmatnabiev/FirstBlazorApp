@@ -6,7 +6,7 @@ namespace FirstBlazorApp.Data.Services.Impl
 {
     public class AuthorService : IAuthorService
     {
-        private const string authorsServiceApiUrl = "https://localhost:44317/api/";
+        private const string authorsServiceApiUrl = "https://localhost:7249/api/";
         private IBaseDumpSaver BaseDumpSaver { get; set; }
         private HttpClient HttpClient { get; set; }
 

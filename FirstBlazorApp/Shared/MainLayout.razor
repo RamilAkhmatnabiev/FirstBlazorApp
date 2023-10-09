@@ -1,6 +1,7 @@
 ﻿@using FirstBlazorApp.Data.Providers
 @inherits LayoutComponentBase
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 
 <PageTitle>FirstBlazorApp</PageTitle>
 
@@ -13,10 +14,10 @@
         <div class="top-row px-4">
             <AuthorizeView>
                 <Authorized>
-                    <a href="Login" onclick="@LogOut">LogOut</a>
+                    <a href="/" onclick="@LogOut">LogOut</a>
                 </Authorized>
                 <NotAuthorized>
-                    <a href="Login">Login</a>
+                    <a href="/">Login</a>
                 </NotAuthorized>
             </AuthorizeView>
             <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
@@ -34,5 +35,6 @@
     private async Task LogOut()
     {
         await ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsLoggedOut();
+        NavigationManager.NavigateTo("/");
     }
 }
