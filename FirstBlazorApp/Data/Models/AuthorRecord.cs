@@ -5,6 +5,7 @@ namespace FirstBlazorApp.Data.Models
     public record AuthorRecord
     {
         public int AuthorId { get; set; }
+        public int AuthorIdNew { get; set; }
         [Required] public string LastName { get; set; } = null!;
 
         [Required(ErrorMessage = "Name is required")]
